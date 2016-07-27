@@ -35,7 +35,7 @@ public class GameTest {
   }
 
   @Test
-  public void cantPlayTwoTimesInTheSameCell() throws Exception {
+  public void aPlayercantPlayTwoTimesInTheSameCell() throws Exception {
     thrown.expect(InvalidPlayException.class);
     game.makePlay(0,0,'X');
     game.makePlay(0,0,'X');
@@ -73,12 +73,11 @@ public class GameTest {
   }
 
   @Test
-  public void test_XXX() throws Exception {
+  public void botPlayAWinnerMoveIfHasTwoPointsInARow() throws Exception {
     game.makePlay(0,0,'X');
     game.makePlay(0,1,'X');
     game.botChooseWhereToPlay();
     assertEquals("Game ends", game.getStatus());
-
   }
 
   @Test
@@ -104,6 +103,7 @@ public class GameTest {
 
   private class Game {
 
+    public static final String CANT_FIND_A_PLAY = "Can't find a play... GG :(";
     private char[][] board = new char[3][3];
     private String status = " ";
 
@@ -224,21 +224,41 @@ public class GameTest {
       status = "Game ends";
     }
 
-    private Play botChooseWhereToPlay() throws InvalidPlayException, CanFindAPlayException {
+    private void botChooseWhereToPlay() throws InvalidPlayException, CanFindAPlayException {
+      Play play = new Play();
+      int numberOfX = 0;
+
       for (int i = 0 ; i < 3 ; i++) {
         for (int j = 0 ; j < 3 ; j++) {
-          if (board[i][j] == ' ')
-           return new Play(i, j, 'X');
+          if (board[i][j] == 'X'){
+            numberOfX++;
+          }else{
+            if(numberOfX == 2 && board[i][j] == ' '){
+              play.setMove(i, j, 'X');
+            }
+          }
         }
+        numberOfX = 0;
       }
-      throw new CanFindAPlayException("Can't find a play... GG :(");
+
+      if(play.isValid()){
+        makePlay(play.getX(), play.getY(), play.getSymbol());
+        if(aPlayerWon()){
+          gameEnds();
+        }
+      }else{
+        throw new CanFindAPlayException(CANT_FIND_A_PLAY);
+      }
+
     }
+
 
     private void fillTheBoard(char x) {
       for (int i = 0 ; i < 3 ; i++)
         for (int j = 0 ; j < 3 ; j++)
           board[i][j] = 'X';
     }
+
 
     private class Play {
       int x;
@@ -249,6 +269,16 @@ public class GameTest {
         this.x = x;
         this.y = y;
         this.symbol = symbol;
+      }
+
+      public Play() {
+        x = -1;
+        y = -1;
+        symbol = ' ';
+      }
+
+      public boolean isValid(){
+        return (x != -1 && y != -1);
       }
 
       private int getX() {
@@ -263,8 +293,12 @@ public class GameTest {
         return symbol;
       }
 
+      public void setMove(int x, int y, char c) {
+        this.x = x;
+        this.y = y;
+        this.symbol = c;
+      }
     }
-
 
   }
 
