@@ -9,11 +9,11 @@ public class GameTest {
   @Rule
   public ExpectedException thrown = ExpectedException.none();
 
-  private final Game game = new Game();
+  private Game game;
 
   @org.junit.Before
   public void setUp() throws Exception {
-
+    game = new Game();
   }
 
   @Test
@@ -58,7 +58,7 @@ public class GameTest {
   }
 
   @Test
-  public void aPlayerWithAFullDiagonalWins() throws Exception {
+  public void aPlayerWithAFullPrimaryDiagonalWins() throws Exception {
     game.makePlay(0,0,'X');
     game.makePlay(1,1,'X');
     game.makePlay(2,2,'X');
@@ -66,18 +66,51 @@ public class GameTest {
   }
 
   @Test
-  public void cantFindAPlayIfTheBoardIsFull() throws Exception {
-    thrown.expect(CanFindAPlayException.class);
-    game.fillTheBoard('X');
-    game.botChooseWhereToPlay();
+  public void aPlayerWithAFullSecondaryDiagonalWins() throws Exception {
+    game.makePlay(0,2,'X');
+    game.makePlay(1,1,'X');
+    game.makePlay(2,0,'X');
+    assertTrue(game.aPlayerWon());
   }
 
   @Test
-  public void botPlayAWinnerMoveIfHasTwoPointsInARow() throws Exception {
+  public void cantFindAPlayIfTheBoardIsFull() throws Exception {
+    thrown.expect(InvalidPlayException.class);
+    game.fillTheBoard('X');
+    game.makePlay(0,0,'X');
+  }
+
+  @Test
+  public void test1() throws Exception {
+    Play play;
+
     game.makePlay(0,0,'X');
     game.makePlay(0,1,'X');
-    game.botChooseWhereToPlay();
-    assertEquals("Game ends", game.getStatus());
+    play = game.botChooseWhereToPlay();
+    assertTrue(play.getX() == 0 && play.getY()==2 && play.getSymbol()=='X');
+  }
+  @Test
+  public void test2() throws Exception {
+    game.makePlay(0,1,'X');
+    game.makePlay(0,2,'X');
+    Play play = game.botChooseWhereToPlay();
+    assertTrue(play.getX() == 0 && play.getY() == 0 && play.getSymbol() == 'X');
+  }
+
+  @Test
+  public void test3() throws Exception {
+    game.makePlay(0,0,'X');
+    game.makePlay(0,2,'X');
+    Play play = game.botChooseWhereToPlay();
+    assertTrue(play.getX() == 0 && play.getY() == 1 && play.getSymbol() == 'X');
+  }
+
+  @Test
+  public void test4() throws Exception {
+    game.makePlay(1,0,'X');
+    game.makePlay(1,1,'X');
+    Play play = game.botChooseWhereToPlay();
+    assertTrue(play.getX() == 1 && play.getY() == 2 && play.getSymbol() == 'X');
   }
 
   @Test
@@ -114,7 +147,7 @@ public class GameTest {
       status = "Game running";
     }
 
-    private void makePlay(int x, int y, char symbol) throws InvalidPlayException {
+    private void makePlay(int x, int y, char symbol) throws InvalidPlayException, CanFindAPlayException {
       if (coordinatesAreInvalid(x, y))
         throw new InvalidPlayException("Invalid cell coordinate");
 
@@ -143,10 +176,10 @@ public class GameTest {
       boolean aPlayerWon = false;
 
       for (int i = 0 ; i < 3 ; i++) {
-          if (board[i][i] == 'X')
-            scorePlayerX++;
-          if (board[i][i] == 'O')
-            scorePlayerO++;
+        if (board[i][i] == 'X')
+          scorePlayerX++;
+        if (board[i][i] == 'O')
+          scorePlayerO++;
       }
       if(scorePlayerX == 3 || scorePlayerO == 3)
         aPlayerWon = true;
@@ -156,7 +189,7 @@ public class GameTest {
       }
 
       for (int i = 0 ; i < 3 ; i++) {
-        for (int j = 2; j > 0; j--) {
+        for (int j = 2; j >= 0; j--) {
           if (board[i][j] == 'X')
             scorePlayerX++;
           if (board[i][j] == 'O')
@@ -169,7 +202,7 @@ public class GameTest {
 
       return aPlayerWon;
 
-  }
+    }
 
     private boolean aPlayerWonByColumn() {
       int scorePlayerX = 0;
@@ -224,7 +257,7 @@ public class GameTest {
       status = "Game ends";
     }
 
-    private void botChooseWhereToPlay() throws InvalidPlayException, CanFindAPlayException {
+    private Play botChooseWhereToPlay() throws InvalidPlayException, CanFindAPlayException {
       Play play = new Play();
       int numberOfX = 0;
 
@@ -233,22 +266,26 @@ public class GameTest {
           if (board[i][j] == 'X'){
             numberOfX++;
           }else{
-            if(numberOfX == 2 && board[i][j] == ' '){
+            if( board[i][j] == ' '){
               play.setMove(i, j, 'X');
             }
           }
         }
-        numberOfX = 0;
+        if(numberOfX == 2)
+          return play;
+        else
+          numberOfX = 0;
       }
+      return play;
 
-      if(play.isValid()){
-        makePlay(play.getX(), play.getY(), play.getSymbol());
-        if(aPlayerWon()){
-          gameEnds();
-        }
-      }else{
-        throw new CanFindAPlayException(CANT_FIND_A_PLAY);
-      }
+//      if(play.isValid()){
+//        makePlay(play.getX(), play.getY(), play.getSymbol());
+//        if(aPlayerWon()){
+//          gameEnds();
+//        }
+//      }else{
+//        throw new CanFindAPlayException(CANT_FIND_A_PLAY);
+//      }
 
     }
 
@@ -260,48 +297,49 @@ public class GameTest {
     }
 
 
-    private class Play {
-      int x;
-      int y;
-      char symbol;
 
-      Play(int x, int y, char symbol) {
-        this.x = x;
-        this.y = y;
-        this.symbol = symbol;
-      }
-
-      public Play() {
-        x = -1;
-        y = -1;
-        symbol = ' ';
-      }
-
-      public boolean isValid(){
-        return (x != -1 && y != -1);
-      }
-
-      private int getX() {
-        return x;
-      }
-
-      private int getY() {
-        return y;
-      }
-
-      private char getSymbol() {
-        return symbol;
-      }
-
-      public void setMove(int x, int y, char c) {
-        this.x = x;
-        this.y = y;
-        this.symbol = c;
-      }
-    }
 
   }
 
+  private class Play {
+    int x;
+    int y;
+    char symbol;
+
+    Play(int x, int y, char symbol) {
+      this.x = x;
+      this.y = y;
+      this.symbol = symbol;
+    }
+
+    public Play() {
+      x = -1;
+      y = -1;
+      symbol = ' ';
+    }
+
+    public boolean isValid(){
+      return (x != -1 && y != -1);
+    }
+
+    private int getX() {
+      return x;
+    }
+
+    private int getY() {
+      return y;
+    }
+
+    private char getSymbol() {
+      return symbol;
+    }
+
+    public void setMove(int x, int y, char c) {
+      this.x = x;
+      this.y = y;
+      this.symbol = c;
+    }
+  }
   private class CanFindAPlayException extends Exception {
     CanFindAPlayException(String message) {
       super(message);
