@@ -81,37 +81,150 @@ public class GameTest {
   }
 
   @Test
-  public void test1() throws Exception {
+  public void canFindWinnerPlayInRow() throws Exception {
     Play play;
 
     game.makePlay(0,0,'X');
     game.makePlay(0,1,'X');
-    play = game.botChooseWhereToPlay();
-    assertTrue(play.getX() == 0 && play.getY()==2 && play.getSymbol()=='X');
-  }
-  @Test
-  public void test2() throws Exception {
+    play = game.botFindWhereToPlay();
+    assertTrue(play.is( 0, 2, 'X'));
+
+    game = new Game();
     game.makePlay(0,1,'X');
     game.makePlay(0,2,'X');
-    Play play = game.botChooseWhereToPlay();
-    assertTrue(play.getX() == 0 && play.getY() == 0 && play.getSymbol() == 'X');
-  }
+    play = game.botFindWhereToPlay();
+    assertTrue(play.is( 0, 0, 'X'));
 
-  @Test
-  public void test3() throws Exception {
+    game = new Game();
     game.makePlay(0,0,'X');
     game.makePlay(0,2,'X');
-    Play play = game.botChooseWhereToPlay();
-    assertTrue(play.getX() == 0 && play.getY() == 1 && play.getSymbol() == 'X');
+    play = game.botFindWhereToPlay();
+    assertTrue(play.is( 0, 1, 'X'));
+
+    game = new Game();
+    game.makePlay(1,0,'X');
+    game.makePlay(1,1,'X');
+    play = game.botFindWhereToPlay();
+    assertTrue(play.is( 1, 2, 'X'));
+
+    game = new Game();
+    game.makePlay(1,0,'X');
+    game.makePlay(1,2,'X');
+    play = game.botFindWhereToPlay();
+    assertTrue(play.is( 1, 1, 'X'));
+
+    game = new Game();
+    game.makePlay(1,1,'X');
+    game.makePlay(1,2,'X');
+    play = game.botFindWhereToPlay();
+    assertTrue(play.is( 1, 0, 'X'));
+
+    game = new Game();
+    game.makePlay(2,0,'X');
+    game.makePlay(2,1,'X');
+    play = game.botFindWhereToPlay();
+    assertTrue(play.is( 2, 2, 'X'));
+
+    game = new Game();
+    game.makePlay(2,0,'X');
+    game.makePlay(2,2,'X');
+    play = game.botFindWhereToPlay();
+    assertTrue(play.is( 2, 1, 'X'));
+
+    game = new Game();
+    game.makePlay(2,2,'X');
+    game.makePlay(2,1,'X');
+    play = game.botFindWhereToPlay();
+    assertTrue(play.is( 2, 0, 'X'));
+  }
+
+
+  @Test
+  public void canFindWinnerPlayInColumn() throws Exception {
+    Play play;
+
+    game.makePlay(0, 0, 'X');
+    game.makePlay(1, 0, 'X');
+    play = game.botFindWhereToPlay();
+    assertTrue(play.is( 2, 0, 'X'));
+
+    game = new Game();
+    game.makePlay(0, 0, 'X');
+    game.makePlay(2, 0, 'X');
+    play = game.botFindWhereToPlay();
+    assertTrue(play.is( 1, 0, 'X'));
+
+  }
+  @Test
+  public void canFindWinnerPlayInDiagonal() throws Exception {
+    Play play;
+
+    game = new Game();
+    game.makePlay(0,0,'X');
+    game.makePlay(1,1,'X');
+    play = game.botFindWhereToPlay();
+    assertTrue(play.is( 2, 2, 'X'));
+
+    game = new Game();
+    game.makePlay(0,0,'X');
+    game.makePlay(2,2,'X');
+    play = game.botFindWhereToPlay();
+    assertTrue(play.is( 1, 1, 'X'));
+
+    game = new Game();
+    game.makePlay(0,2,'X');
+    game.makePlay(1,1,'X');
+    play = game.botFindWhereToPlay();
+    assertTrue(play.is( 2, 0, 'X'));
+
+    game = new Game();
+    game.makePlay(0,2,'X');
+    game.makePlay(2,0,'X');
+    play = game.botFindWhereToPlay();
+    assertTrue(play.is( 1, 1, 'X'));
   }
 
   @Test
-  public void test4() throws Exception {
-    game.makePlay(1,0,'X');
+  public void canBlockOpponentWinnerPlay() throws Exception {
+    Play play;
+    game.makePlay(0,0,'O');
+    game.makePlay(0,2,'O');
     game.makePlay(1,1,'X');
-    Play play = game.botChooseWhereToPlay();
-    assertTrue(play.getX() == 1 && play.getY() == 2 && play.getSymbol() == 'X');
+    play = game.botFindWhereToPlay();
+    assertTrue(play.is( 0, 1, 'X'));
+
+    game = new Game();
+    game.makePlay(0,0,'O');
+    game.makePlay(0,1,'O');
+    game.makePlay(1,1,'X');
+    play = game.botFindWhereToPlay();
+    assertTrue(play.is( 0, 2, 'X'));
+
+    game = new Game();
+    game.makePlay(0,0,'O');
+    game.makePlay(1,0,'O');
+    game.makePlay(1,1,'X');
+    play = game.botFindWhereToPlay();
+    assertTrue(play.is( 2, 0, 'X'));
+
+    game = new Game();
+    game.makePlay(0,0,'O');
+    game.makePlay(1,1,'O');
+    game.makePlay(1,0,'X');
+    play = game.botFindWhereToPlay();
+    assertTrue(play.is( 2, 2, 'X'));
   }
+
+  @Test
+  public void canCreateAFork() throws Exception {
+    Play play;
+    game.makePlay(0,0,'X');
+    game.makePlay(2,0,'X');
+    game.makePlay(1,0,'O');
+    play = game.botFindWhereToPlay();
+    assertTrue(play.is( 0, 2, 'X') || play.is(2,2, 'X'));
+  }
+
 
   @Test
   public void gameCanShowStatus() throws Exception {
@@ -139,6 +252,8 @@ public class GameTest {
     public static final String CANT_FIND_A_PLAY = "Can't find a play... GG :(";
     private char[][] board = new char[3][3];
     private String status = " ";
+    private int[] rowScore;
+    private int[] columnScore;
 
     Game(){
       for (int i = 0 ; i < 3 ; i++)
@@ -257,43 +372,116 @@ public class GameTest {
       status = "Game ends";
     }
 
-    private Play botChooseWhereToPlay() throws InvalidPlayException, CanFindAPlayException {
-      Play play = new Play();
-      int numberOfX = 0;
+    private Play botFindWhereToPlay() throws InvalidPlayException, CanFindAPlayException {
+      Play play;
+      play = findWinnerPlay('X');
+      if(play.isValid())
+        return play;
+      
+      play = findBlockPlay();
+      if(play.isValid())
+        play.setSymbol('X');
 
+      int winnerPlays = 0;
       for (int i = 0 ; i < 3 ; i++) {
         for (int j = 0 ; j < 3 ; j++) {
-          if (board[i][j] == 'X'){
-            numberOfX++;
-          }else{
-            if( board[i][j] == ' '){
-              play.setMove(i, j, 'X');
-            }
+          boolean changed = false;
+          char prev =' ';
+          if (board[i][j] == ' '){
+            prev = board[i][j];
+            board[i][j] = 'X';
+            changed =true;
+            if (findWinnerPlayInRowOrColumn('X').isValid())
+              winnerPlays++;
+            if(findWinnerPlayInDiagonal('X').isValid())
+              winnerPlays++;
+          }
+          if (winnerPlays == 2){
+            play.setMove(i,j,'X');
+          }else if(changed){
+            board[i][j] = prev;
+            winnerPlays = 0;
           }
         }
-        if(numberOfX == 2)
-          return play;
-        else
-          numberOfX = 0;
       }
+
       return play;
-
-//      if(play.isValid()){
-//        makePlay(play.getX(), play.getY(), play.getSymbol());
-//        if(aPlayerWon()){
-//          gameEnds();
-//        }
-//      }else{
-//        throw new CanFindAPlayException(CANT_FIND_A_PLAY);
-//      }
-
     }
 
+    private Play findBlockPlay() {
+      return findWinnerPlay('O');
+    }
 
-    private void fillTheBoard(char x) {
+    private Play findWinnerPlay(char symbol) {
+
+      Play play;
+      play = findWinnerPlayInRowOrColumn(symbol);
+
+      if(play.isValid())
+        return play;
+
+      play = findWinnerPlayInDiagonal(symbol);
+      return play;
+    }
+
+    private Play findWinnerPlayInDiagonal(char symbol) {
+      Play playOne = new Play();
+      Play playTwo = new Play();
+      int diagonalOne = 0;
+      int diagonalTwo = 0;
+      for(int i = 0; i < 3 ; i++){
+        if(board[i][i] == symbol)
+          diagonalOne++;
+        else if(board[i][i] == ' ')
+          playOne.setMove(i, i, symbol);
+        if(board[i][2-i] == symbol)
+          diagonalTwo++;
+        else if(board[i][2 -i] == ' ')
+          playTwo.setMove(i, 2 -i, symbol);
+      }
+      if(diagonalOne == 2)
+        return playOne;
+      if(diagonalTwo == 2)
+        return playTwo;
+      return new Play();
+    }
+
+    private Play findWinnerPlayInRowOrColumn(char symbol) {
+      countRowsAndColumnsScores(symbol);
+      Play play= new Play();
+      for(int i = 0; i < 3 ; i++){
+        if(columnScore[i] == 2) {
+          for (int j = 0; j < 3; j++)
+            if (rowScore[j] == 0 && board[j][i] == ' ')
+              play.setMove(j, i, symbol);
+        }
+        if(rowScore[i] == 2)
+        {
+          for (int j = 0; j < 3; j++)
+            if (columnScore[j] == 0 && board[i][j] == ' ')
+              play.setMove(i, j, symbol);
+        }
+      }
+      return play;
+    }
+
+    private void countRowsAndColumnsScores(char symbol) {
+      rowScore = new int[]{0,0,0};
+      columnScore = new int[]{0,0,0};
+      for (int i = 0 ; i < 3 ; i++) {
+        for (int j = 0 ; j < 3 ; j++) {
+          if (board[i][j] == symbol){
+            rowScore[i]++;
+            columnScore[j]++;
+          }
+        }
+      }
+    }
+
+    private void fillTheBoard(char symbol) {
       for (int i = 0 ; i < 3 ; i++)
         for (int j = 0 ; j < 3 ; j++)
-          board[i][j] = 'X';
+          board[i][j] = symbol;
     }
 
 
@@ -338,6 +526,14 @@ public class GameTest {
       this.x = x;
       this.y = y;
       this.symbol = c;
+    }
+
+    public boolean is(int x, int y, char c) {
+      return (this.x == x && this.y == y && this.symbol == c);
+    }
+
+    public void setSymbol(char symbol) {
+      this.symbol = symbol;
     }
   }
   private class CanFindAPlayException extends Exception {
