@@ -14,6 +14,7 @@ public class GameTest {
   @org.junit.Before
   public void setUp() throws Exception {
     game = new Game();
+    
   }
 
   @Test
